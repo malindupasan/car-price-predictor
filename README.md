@@ -1,5 +1,7 @@
 # Future Car Price Prediction System
 
+https://github.com/malindupasan/car-price-predictor/blob/main/preview/lowSize.mp4
+
 This repository contains   **Car Price Prediction System**. This application is designed to provide car dealers to predict the market values of cars yet to be released.
 
 
