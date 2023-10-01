@@ -1,4 +1,7 @@
+import io
+
 import h2o
+import pandas as pd
 from h2o.automl import H2OAutoML
 
 
@@ -35,7 +38,7 @@ def predict(saved_model, params, num_years=4):
     future years.
     Args:
         saved_model (H2OEstimator): The trained H2O model.
-        params (dict): Dictionary containing input parameters for prediction.
+        params (dict | string): Dictionary containing input parameters for prediction.
         num_years (int, optional): The number of future years to predict (default is 5).
     Returns:
         list: A list of lists containing predicted prices for each future year.
@@ -49,6 +52,31 @@ def predict(saved_model, params, num_years=4):
         preds_df = preds.as_data_frame()
         predicted_value = round(preds_df.iloc[0, 0], 2)
         results.append([str(params['year_model'][0] + 5), str(predicted_value)])
+    return results
+
+
+def predict_batch(saved_model, csv_path):
+    """
+    Function for batch prediction using a saved machine learning model
+    Args:
+        - saved_model: A pre-trained machine learning model (H2O model)
+         - csv_path: Path to the CSV file containing data for prediction
+     Returns:
+         - results: A list of dictionaries, each containing the original data row
+        along with the predicted value from the model
+    """
+    df = pd.read_csv(csv_path)
+    results = []
+
+    for i in range(len(df)):
+        year_model = int(df.loc[i, 'year_model'])
+        df.loc[i, 'year_model'] = year_model
+        preds = saved_model.predict(h2o.H2OFrame(df.loc[i:i]))
+        preds_df = preds.as_data_frame()
+        predicted_value = round(preds_df.iloc[0, 0], 2)
+        row_data = df.loc[i].to_dict()
+        row_data['predicted_value'] = str(predicted_value)
+        results.append(row_data)
 
     return results
 

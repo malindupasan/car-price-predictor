@@ -1,10 +1,7 @@
 from h2o_wave import Q, main, app, ui
 import h2o
-
-from model import predict
+from model import predict, predict_batch
 import pandas as pd
-# from fuzzywuzzy import process
-from typing import Any
 
 h2o.init()
 saved_model = h2o.load_model("models/fipe_model/StackedEnsemble_AllModels_1_AutoML_1_20231001_14406")
@@ -21,6 +18,7 @@ async def serve(q: Q):
 
     if not q.client.initialized:
         add_form_card(q)
+
         add_header(q)
         add_footer(q)
         q.client.initialized = True
@@ -36,12 +34,18 @@ async def serve(q: Q):
         predicted_values = predict(saved_model, params)
         add_table(q, predicted_values)
 
-    if q.args.predictagain:
+    if q.args.csv_upload:
+        local_path = await q.site.download(q.args.csv_upload[0],
+                                           '/Users/malindudesilva/PycharmProjects/pythonProject2/uploads')
+        predicted_values = predict_batch(saved_model, local_path)
+        # print(predicted_values)
+        del q.page["example"]
+        add_batch_table(q, predicted_values)
+
+    if q.args.batch:
+        del q.page["example"]
         del q.page["table_card"]
-        del q.page["predict_btn"]
-        add_form_card(q)
-        add_header(q)
-        add_footer(q)
+        upload_batch(q)
 
     await q.page.save()
 
@@ -109,7 +113,8 @@ def add_form_card(q: Q):
                     ]
                 ),
             ]),
-            ui.button(name='predict', label='Predict')
+            ui.button(name='predict', label='Predict'),
+            ui.button(name='batch', label='batch', primary=True)
         ]
     )
 
@@ -131,6 +136,52 @@ def add_table(q: Q, rows):
                 ui.table_column(name='price', label='Price (USD)'),
             ],
             rows=table_rows
+        )
+    ])
+
+
+def add_batch_table(q: Q, rows):
+    """
+    Adds the table card to the page to display batch predictions.
+    Args:
+        - rows (Any): The rows of data (predictions) to display in the table.
+    """
+    # print(rows)
+    table_rows = [ui.table_row(name=f'row{i}', cells=[str(value) for value in row.values()]) for i, row in
+                  enumerate(rows)]
+    # print(table_rows)
+    q.page['table_card'] = ui.form_card(box='2 3 8 7', items=[
+        ui.text('<h3><b>Batch - Predictions</b></h3>'),
+        ui.table(
+            name='table',
+            columns=[
+
+                ui.table_column(name='brand', label="Make"),
+                ui.table_column(name='fuel', label="Fuel Type"),
+                ui.table_column(name='Gear', label="Gear "),
+                ui.table_column(name='enginesize', label='Engine Size'),
+                ui.table_column(name='year', label="Year"),
+
+                ui.table_column(name='predicted_value', label='Price In USD($)'),
+
+            ],
+            rows=table_rows
+        )
+    ])
+
+
+def upload_batch(q: Q):
+    """
+      upload the batch file to server.
+    """
+    q.page['example'] = ui.form_card(box='3 3 4 4', items=[
+        ui.file_upload(
+            name='csv_upload',
+            label='Predict',
+            multiple=False,
+            file_extensions=['csv'],
+            max_file_size=50,  # Specified in MB.
+            max_size=100,  # Specified in MB.
         )
     ])
 
