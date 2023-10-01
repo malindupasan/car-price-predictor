@@ -1,6 +1,5 @@
 from h2o_wave import Q, main, app, ui
 import h2o
-
 from model import predict, predict_batch
 import pandas as pd
 
