@@ -1,4 +1,3 @@
-# from rec_sys.rec_func import recommender
 from h2o_wave import Q, main, app, ui
 import h2o
 
@@ -32,7 +31,7 @@ async def serve(q: Q):
             'fuel': [q.args.fuel],
             'gear': [q.args.gear],
             'engine_size': [float(q.args.enginesize)],
-            'year_model': [int(q.args.year)],
+            'year_model': [2023],
         }
         predicted_values = predict(saved_model, params)
         add_table(q, predicted_values)
@@ -53,7 +52,7 @@ def add_header(q: Q):
     """
 
     q.page['header'] = ui.header_card(
-        box='1 1 9 1',
+        box='1 1 10 1',
         title='Car Price Predictor',
         subtitle='',
         image='https://wave.h2o.ai/img/h2o-logo.svg',
@@ -78,13 +77,22 @@ def add_form_card(q: Q):
         items=[
             ui.text('<h3><b>Enter Car Details:</b></h3>'),
             ui.inline(items=[
-                ui.textbox(name='year', label='Year of the Model', value=q.args.year, required=True),
                 ui.dropdown(
                     name='brand',
                     value=q.args.dropdown,
                     label='Car Brand',
                     required=True,
                     choices=dropdown_choices
+                ),
+                ui.dropdown(
+                    name='fuel',
+                    value=q.args.dropdown,
+                    label='Fuel type',
+                    required=True,
+                    choices=[
+                        ui.choice(name='diesel', label="Diesel"),
+                        ui.choice(name='gasoline', label="Gasoline")
+                    ]
                 ),
             ]),
             ui.inline(items=[
@@ -101,16 +109,6 @@ def add_form_card(q: Q):
                     ]
                 ),
             ]),
-            ui.dropdown(
-                name='fuel',
-                value=q.args.dropdown,
-                label='Fuel type',
-                required=True,
-                choices=[
-                    ui.choice(name='diesel', label="Diesel"),
-                    ui.choice(name='gasoline', label="Gasoline")
-                ]
-            ),
             ui.button(name='predict', label='Predict')
         ]
     )
@@ -142,6 +140,6 @@ def add_footer(q: Q):
     Adds the footer card to the page.
     """
     q.page['footer'] = ui.footer_card(
-        box='2 8',
+        box='2 8 7',
         caption='''Made with 💛 by Malindu.'''
     )

@@ -28,7 +28,7 @@ def train_model():
     print(model_path)
 
 
-def predict(saved_model, params, num_years=5):
+def predict(saved_model, params, num_years=4):
     """
     Predicts car prices for future years using a trained model.
     This function takes a trained model, parameters for prediction, and predicts car prices for a specified number of
@@ -44,12 +44,14 @@ def predict(saved_model, params, num_years=5):
     results = []
 
     for i in range(num_years):
-        params['year_model'][0] = year_model+1 - i
+        params['year_model'][0] = year_model - i
         preds = saved_model.predict(h2o.H2OFrame(params))
         preds_df = preds.as_data_frame()
         predicted_value = round(preds_df.iloc[0, 0], 2)
-        results.append([str(params['year_model'][0]), str(predicted_value)])
+        results.append([str(params['year_model'][0] + 5), str(predicted_value)])
 
     return results
 
 
+if __name__ == '__main__':
+    train_model()
