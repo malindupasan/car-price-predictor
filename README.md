@@ -79,7 +79,7 @@ AIC: 1433400.6619283669<br>
 
 ## Learn More
 
-Watch preview  : https://github.com/malindupasan/car-price-predictor/blob/main/preview/price_predict_h2o.mp4
+Watch preview  : https://github.com/malindupasan/car-price-predictor/blob/main/preview/pricepredict.mp4
 
 To learn more about H2O AutoML, check out the [docs](https://docs.h2o.ai/h2o/latest-stable/h2o-docs/automl.html).
 
